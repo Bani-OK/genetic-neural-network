@@ -4,6 +4,7 @@ import manimlib
 
 import time as tl
 
+import math
 import constants
 from constants import *
 from organism import Organism, Flower
@@ -16,9 +17,6 @@ class Generation:
         self.flowers: set[Flower] = set()
         self.blocks: list[list[list[Organism]]] = \
             [[list() for _ in range(10)] for _ in range(10)]
-
-        # self.organisms_data = ''
-        # self.flowers_data = ''
         self._initialize_flowers(constants.FLOWERS_AMOUNT)
 
         self.average_lifetimes = []
@@ -29,7 +27,6 @@ class Generation:
             flower = Flower(self.scene, time)
             self._add_organism_to_blocks(flower)
             self.flowers.add(flower)
-            # self.flowers_data += str(flower)
 
     def _add_organism_to_blocks(self, organism):
         x_coord = int(organism.coordinates[0] // 10)
@@ -70,21 +67,11 @@ class Generation:
             organism = Organism(self.scene)
             self.organisms.add(organism)
             self._add_organism_to_blocks(organism)
-            # self.organisms_data += str(organism)
 
     def add_organisms(self, organisms):
         for organism in organisms:
             self.organisms.add(organism)
             self._add_organism_to_blocks(organism)
-            # self.organisms_data += str(organism)
-
-    # def add_mutated(self, amount):
-    #     organisms = []
-    #     for _ in range(amount):
-    #         parent = random.choice(list(self.organisms))
-    #         child = self.mutate_from_organism(parent)
-    #         organisms.append(child)
-    #     self.add_organisms(organisms)
 
     def mutate_from_organism(self, parent, time=0):
         network_vector = parent.network_vector()
@@ -108,7 +95,7 @@ class Generation:
             path_to_organism_file='organisms.txt',
             path_to_result_file='results.txt'):
         time_passed = 0
-        # self.scene.play(*self.scene.animations[-1], run_time=0.05)
+        self.scene.play(*self.scene.animations[-1], run_time=0.05)
         is_not_over = True
         while time != time_passed and self.organisms and \
                 len(self.organisms) < 500 and is_not_over:
@@ -124,10 +111,7 @@ class Generation:
                     print(f'{time_passed:5} -> {len(self.organisms):3}, '
                           f'{self.average_lifetimes[-1]} - '
                           f'{self.average_energy[-1]}')
-                    # f'{time_for_move:3} = {time_to_move:3} + '
-                    # f'{time_to_coli:3} + {time_to_mutate:3}')
-                # self.write_down(path_to_organism_file, path_to_flower_file,
-                #                 time_passed)
+                self.write_down(path_to_organism_file, path_to_flower_file, time_passed)
             except KeyboardInterrupt:
                 is_not_over = False
         self.write_results(path_to_result_file)
@@ -156,7 +140,6 @@ class Generation:
 
     def _move_everyone(self):
         remove = set()
-        # smallest = sorted(self.organisms, key=lambda x: x.size)[0]
         for organism in self.organisms:
             if not organism.is_alive:
                 continue
@@ -179,49 +162,44 @@ class Generation:
                             continue
                         organism.update_view(other, view_data)
             organism.update_walls(view_data)
-            # for other in self.flowers:
-            #     if other.is_alive and other is not organism:
-            #         organism.update_view(other, view_data)
-            # if organism is smallest:
-            #     self.play_lines(smallest, view_data)
             self._remove_organism_from_blocks(organism)
             organism.make_move(view_data)
             if organism.energy < 0:
                 remove.add(organism)
                 organism.is_alive = False
-                # self.scene.animations[-1]. \
-                #     append(manimlib.FadeOut(organism.obj))
+                self.scene.animations[-1]. \
+                    append(manimlib.FadeOut(organism.obj))
             else:
                 self._add_organism_to_blocks(organism)
-        # self.play_anim()
+        self.play_anim()
         for dead in remove:
             self.organisms.remove(dead)
             del dead
 
-    # def play_lines(self, smallest, smallest_view):
-    #     half_angle = (MIN_VIEW_ANGLE + (MAX_VIEW_ANGLE -
-    #                                     MIN_VIEW_ANGLE)
-    #                   * (1 - smallest.size))
-    #     from manimlib import UP, RIGHT, Line, FadeIn, FadeOut
-    #     anims = []
-    #     post_anims = []
-    #     for idx in range(24):
-    #         cur_angle = smallest.angle + half_angle - (half_angle / 11.5) * idx
-    #         vector = UP * math.sin(cur_angle) + RIGHT * math.cos(cur_angle)
-    #         line = Line(smallest.obj.get_center(),
-    #                     smallest.obj.get_center() +
-    #                     vector * smallest_view[idx, 0])
-    #         anims.append(FadeIn(line))
-    #         post_anims.append(FadeOut(line))
-    #     self.scene.play(*anims, self.scene.camera
-    #                     .frame.animate.move_to(smallest.obj),
-    #                     run_time=0.000000001)
-    #     self.scene.wait(0.01)
-    #     self.scene.play(*post_anims, run_time=0.000000001)
+    def play_lines(self, smallest, smallest_view):
+        half_angle = (MIN_VIEW_ANGLE + (MAX_VIEW_ANGLE -
+                                        MIN_VIEW_ANGLE)
+                      * (1 - smallest.size))
+        from manimlib import UP, RIGHT, Line, FadeIn, FadeOut
+        anims = []
+        post_anims = []
+        for idx in range(24):
+            cur_angle = smallest.angle + half_angle - (half_angle / 11.5) * idx
+            vector = UP * math.sin(cur_angle) + RIGHT * math.cos(cur_angle)
+            line = Line(smallest.obj.get_center(),
+                        smallest.obj.get_center() +
+                        vector * smallest_view[idx, 0])
+            anims.append(FadeIn(line))
+            post_anims.append(FadeOut(line))
+        self.scene.play(*anims, self.scene.camera
+                        .frame.animate.move_to(smallest.obj),
+                        run_time=0.000000001)
+        self.scene.wait(0.01)
+        self.scene.play(*post_anims, run_time=0.000000001)
 
-    # def play_anim(self):
-    #     self.scene.play(*self.scene.animations[-1], run_time=0.000000001)
-    #     self.scene.next_move_setup()
+    def play_anim(self):
+        self.scene.play(*self.scene.animations[-1], run_time=0.000000001)
+        self.scene.next_move_setup()
 
     def _check_collisions(self, time):
         flowers_to_spawn = 0
