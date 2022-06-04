@@ -11,7 +11,7 @@ _**Комп’ютерні науки**_
 
 **Дослідження й симуляція штучного життя за допомогою теорії автоматів та машини Тюрінга.**
 
-![image](https://user-images.githubusercontent.com/91616531/172024410-9e5ca404-12e2-4993-8a32-e11e518cf6ca.png)
+![image](https://user-images.githubusercontent.com/91616531/172024410-9e5ca404-12e2-4993-8a32-e11e518cf6ca.png = 250*250)
 
 
 *Автори:*
