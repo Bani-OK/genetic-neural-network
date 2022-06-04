@@ -8,7 +8,7 @@ class Organism:
 
     def __init__(self, scene, size=None, neural_network: np.ndarray = None,
                  time_appeared=0):
-        # self.scene = scene
+        self.scene = scene
         self.size = size
         if size is None:
             self.size = round(random.random() * (1 - FLOWER_ENERGY_SCALE) +
@@ -30,8 +30,8 @@ class Organism:
         self.time_appeared = time_appeared
         # self.__start_data = repr(self)
 
-        # self.obj = scene.new_organism(self)
-        # scene.animations[-1].append(FadeIn(self.obj))
+        self.obj = scene.new_organism(self, RADIUS * self.size)
+        scene.animations[-1].append(FadeIn(self.obj))
 
     def generate_random_network(self):
         input_hl_weights = np.random.random(size=(INPUT_LAYER,
@@ -44,7 +44,9 @@ class Organism:
     def handle_collision(self, other):
         dist = np.sqrt((self.coordinates[0] - other.coordinates[0]) ** 2 +
                        (self.coordinates[1] - other.coordinates[1]) ** 2)
-        if dist < 2 * RADIUS:
+        if isinstance(other, Flower) and dist < (self.size + 0.5) * RADIUS:
+            return self._eat(other)
+        if dist < (self.size + other.size) * RADIUS:
             return self._eat(other)
 
     def _eat(self, other):
@@ -54,8 +56,11 @@ class Organism:
 
         other.is_alive = False
         self.ate_amount += 1
-        self.energy += other.size * BASE_ENERGY_RECEIVE
-        # self.scene.animations[-1].append(FadeOut(other.obj))
+        if isinstance(other, Flower):
+            self.energy += 0.3 * BASE_ENERGY_RECEIVE
+        else:
+            self.energy += other.size * BASE_ENERGY_RECEIVE
+        self.scene.animations[-1].append(FadeOut(other.obj))
         return other
 
     def make_move(self, eyes_data=None):
@@ -93,16 +98,19 @@ class Organism:
              MOVEMENT_CONSUMPTION * abs(velocity)) * self.size
         self.energy -= energy_consumed
 
+        opacity = min(max(self.energy / 200, 0), 1)
+        self.obj.set_opacity(opacity)
+
         self.time_lived += 1
 
-        # self.scene.animations[-1].append(Rotate(
-        #     self.obj,
-        #     angular,
-        #     about_point=UP * circle_center[1] + RIGHT * circle_center[0]
-        # ))
-        # self.scene.animations[-1].append(self.obj.animate.move_to(
-        #     self.coordinates[0] * RIGHT + self.coordinates[1] * UP
-        # ))
+        self.scene.animations[-1].append(Rotate(
+            self.obj,
+            angular,
+            about_point=UP * circle_center[1] + RIGHT * circle_center[0]
+        ))
+        self.scene.animations[-1].append(self.obj.animate.move_to(
+            self.coordinates[0] * RIGHT + self.coordinates[1] * UP
+        ))
 
     def update_view(self, other, view_data):
         import update_views
@@ -113,7 +121,8 @@ class Organism:
                                   view_data,
                                   self.angle + half_angle,
                                   self.angle - half_angle,
-                                  other.size)
+                                  other.size,
+                                  isinstance(other, Flower))
 
     def update_walls(self, view_data):
         import update_views
@@ -130,7 +139,7 @@ class Organism:
 
     def __repr__(self):
         return f'{self.time_appeared}, {self.size}, {self.coordinates}, ' \
-               f'{self.angle}, {self.energy}, {self.time_lived},    ' \
+               f'{self.angle}, {self.energy}, {self.time_lived}, ' \
                f'{{{self.neural_network[0].tolist()}; ' \
                f'{self.neural_network[1].tolist()}}}\n'
 
