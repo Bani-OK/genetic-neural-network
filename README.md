@@ -14,6 +14,7 @@ _**Комп’ютерні науки**_
 ![image](https://user-images.githubusercontent.com/91616531/172024466-629be312-be9e-4c69-a553-fd1bb2a458b2.png)
 
 
+
 *Автори:*
 
 Іван Шевченко
