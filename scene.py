@@ -1,9 +1,7 @@
-import datetime
-
 import numpy
 from manimlib import *
 
-sys.path.append('/home/ivan/Documents/UCU/DM_2021/Project2')
+sys.path.append('/home/ivan/Documents/UCU/DM_2021/genetic-neural-network')
 import constants
 from generation import Generation
 from organism import Flower

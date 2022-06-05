@@ -3,8 +3,6 @@ import random
 
 import manimlib
 
-import time as tl
-
 import constants
 from constants import *
 from organism import Organism, Flower
@@ -22,8 +20,8 @@ class Generation:
         # self.flowers_data = ''
         self._initialize_flowers(constants.FLOWERS_AMOUNT)
 
-        self.average_lifetimes = []
-        self.average_energy = []
+        self.average_ate_amount = []
+        self.average_size = []
 
     def _initialize_flowers(self, amount, time=9):
         for _ in range(amount):
@@ -117,16 +115,16 @@ class Generation:
                 len(self.organisms) < 500 and is_not_over:
             try:
                 if time_passed % 10 == 0:
-                    self._average_lifetime()
-                    self._average_energy()
+                    self._average_ate_amount()
+                    self._average_size()
                     self._born_mutated(time_passed)
                 time_passed += 1
                 self._move_everyone()
                 self._check_collisions(time_passed)
                 if time_passed % 100 == 0:
                     print(f'{time_passed:5} -> {len(self.organisms):3}, '
-                          f'{self.average_lifetimes[-1]} - '
-                          f'{self.average_energy[-1]}')
+                          f'{self.average_size[-1]} - '
+                          f'{self.average_ate_amount[-1]}')
                     # f'{time_for_move:3} = {time_to_move:3} + '
                     # f'{time_to_coli:3} + {time_to_mutate:3}')
                 # self.write_down(path_to_organism_file, path_to_flower_file,
@@ -136,15 +134,15 @@ class Generation:
         self.write_results(path_to_result_file)
         print(time_passed)
 
-    def _average_lifetime(self):
-        self.average_lifetimes.append(
-            sum(map(lambda x: x.time_lived,
+    def _average_ate_amount(self):
+        self.average_ate_amount.append(
+            sum(map(lambda x: x.ate_amount,
                     self.organisms)) / len(self.organisms)
         )
 
-    def _average_energy(self):
-        self.average_energy.append(
-            sum(map(lambda x: x.energy,
+    def _average_size(self):
+        self.average_size.append(
+            sum(map(lambda x: x.size,
                     self.organisms)) / len(self.organisms)
         )
 
@@ -224,10 +222,11 @@ class Generation:
                         vector * smallest_view[idx, 0], stroke_width=1)
             anims.append(FadeIn(line))
             post_anims.append(FadeOut(line))
-        self.scene.play(*self.scene.animations[-1],  # *anims,
+        self.scene.play(*self.scene.animations[-1],# *anims,
                         # self.scene.camera.frame.animate.move_to(smallest.obj),
                         run_time=0.01)
-        self.scene.animations[-1] = []  # post_anims
+        # self.scene.animations[-1] = post_anims
+        self.scene.animations[-1] = []
 
     def _check_collisions(self, time):
         flowers_to_spawn = 0
@@ -276,5 +275,5 @@ class Generation:
                 data += repr(flower)
 
             output.write(data)
-            output.write(', '.join(map(str, self.average_energy)) + '\n')
-            output.write(', '.join(map(str, self.average_lifetimes)) + '\n')
+            output.write(', '.join(map(str, self.average_size)) + '\n')
+            output.write(', '.join(map(str, self.average_ate_amount)) + '\n')

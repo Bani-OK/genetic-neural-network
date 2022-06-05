@@ -32,7 +32,7 @@ def update_views(my_coords, other_coords, view_data, start_angle, end_angle,
                + my_coords[1])
         if is_flower:
             length = circle_dist(other_coords, my_coords,
-                                 (x_2, y_2), 0.1 * RADIUS)
+                                 (x_2, y_2), 0.5 * RADIUS)
         else:
             length = circle_dist(other_coords, my_coords,
                                  (x_2, y_2), size * RADIUS)

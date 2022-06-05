@@ -56,10 +56,7 @@ class Organism:
 
         other.is_alive = False
         self.ate_amount += 1
-        if isinstance(other, Flower):
-            self.energy += 0.3 * BASE_ENERGY_RECEIVE
-        else:
-            self.energy += other.size * BASE_ENERGY_RECEIVE
+        self.energy += other.size * BASE_ENERGY_RECEIVE
         self.scene.animations[-1].append(FadeOut(other.obj))
         return other
 
@@ -69,9 +66,9 @@ class Organism:
 
         if eyes_data is None:
             eyes_data = np.zeros(EYES_AMOUNT * 2)
+        eyes_data[:, 0] /= 5
         input_data = numpy.append(eyes_data, [self.size, self.energy, 1])
         hidden_layer = numpy.matmul(input_data, self.neural_network[0])
-        hidden_layer = activation_func(hidden_layer)
         output_layer = numpy.matmul(hidden_layer, self.neural_network[1])
         velocity, angular = activation_func(output_layer)
         self._make_movement(velocity, angular * MAX_ANGULAR_VELOCITY)
@@ -98,7 +95,7 @@ class Organism:
              MOVEMENT_CONSUMPTION * abs(velocity)) * self.size
         self.energy -= energy_consumed
 
-        opacity = min(max(self.energy / 200, 0), 1)
+        opacity = min(max(self.energy / 100, 0), 1)
         self.obj.set_opacity(opacity)
 
         self.time_lived += 1
